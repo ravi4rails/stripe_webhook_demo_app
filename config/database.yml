@@ -1,0 +1,20 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: postgres
+  host: localhost
+  password: 123456
+
+development:
+  <<: *default
+  database: stripe_webhook_dev
+
+
+test:
+  <<: *default
+  database: stripe_webhook_test
+
+production:
+  <<: *default
+  database: stripe_webhook_prod

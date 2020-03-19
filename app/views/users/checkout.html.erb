@@ -1,0 +1,99 @@
+<div class="container">
+  <div class="col-md-6 mx-md-auto">
+    <div id="flash-messages"></div>
+    <div class="card rounded-0 mt-3">
+      <div class="card-body">
+        <h4>Add your payment method</h4>
+
+        <%= form_for :payment, url: :payments, method: :post, html: { id: 'new_order_form' } do |f| %>
+          <%= f.hidden_field :stripe_card_token %>
+          <%= f.hidden_field :card_token %>
+          <%= f.hidden_field :user_id, value: @user.id %>
+          <div class="form-group">
+            <%= label_tag "Card Number", nil, required: true %>
+            <div class="controls">
+              <%= text_field_tag :card_number, nil, class: "form-control", data: { stripe: "number", inputmask: "'mask': '9999 9999 9999 9999'" } %>
+            </div>
+          </div>
+          <%= label_tag "Card Holder Name", nil, required: true %>
+          <div class="form-group">
+            <div class="controls">
+              <%= text_field_tag :card_holder, nil, class: "form-control", "data-stripe" => "holder" %>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-6">
+              <%= label_tag "Card Verification", nil, required: true %>
+              <div class="control-group">
+                <div class="controls">
+                  <%= password_field_tag :card_verification, nil, class: "form-control", data: { stripe: "cvv", inputmask: "'mask': '9999'" } %>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="row">
+                <div class="col-12">
+                  <%= label_tag "Card Expires", nil, required: true %>
+                </div>
+                <div class="col-md-6">
+                  <%= select_tag :exp_month, options_for_select(month_names), include_blank: false, "data-stripe" => "exp-month", class: "form-control" %>
+                </div>
+                <div class="col-md-6">
+                  <%= select_tag :exp_year, options_for_select(year_range), include_blank: false, "data-stripe" => "exp-year", class: "form-control" %>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <%= f.submit "Submit", class: 'btn btn-success btn-block' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= javascript_include_tag "https://js.stripe.com/v2/" %>
+<script>
+  Stripe.setPublishableKey('<%= "#{Rails.application.credentials[:stripe][:stripe_publishable_key]}" %>');
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.4/inputmask/inputmask.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/3.3.4/bindings/inputmask.binding.min.js"></script>>
+<script type="text/javascript">
+  jQuery(function ($) {
+
+    var show_error, stripeResponseHandler;
+    $("#new_order_form").submit(function (event) {
+      var $form;
+      $form = $(this);
+      $form.find("input[type=submit]").prop("disabled", true);
+      Stripe.card.createToken($form, stripeResponseHandler);
+      return false;
+    });
+
+    stripeResponseHandler = function (status, response) {
+      var $form, token;
+      $form = $("#new_order_form");
+      if (response.error) {
+        show_error(response.error.message);
+        $form.find("input[type=submit]").prop("disabled", false);
+      } else {
+        token = response.id;
+        console.log(token);
+        $form.append($("<input type=\"hidden\" name=\"card_token\" />").val(token));
+        $("[data-stripe=number]").remove();
+        $("[data-stripe=cvv]").remove();
+        $("[data-stripe=exp-year]").remove();
+        $("[data-stripe=exp-month]").remove();
+        $form.get(0).submit();
+      }
+      return false;
+    };
+
+    show_error = function (message) {
+      $("#flash-messages").html('<div class="alert alert-warning"><a href="" class="close" data-dismiss="alert">×</a><div id="flash_alert">' + message + '</div></div>');
+      $('.alert').delay(5000).fadeOut(3000);
+      return false;
+    };
+  });
+</script>
