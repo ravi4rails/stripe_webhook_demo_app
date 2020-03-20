@@ -34,7 +34,6 @@ class StripeUsage
   end
 
   def create_subscription(customer, plan_id)
-    byebug
     Stripe::Subscription.create({
       customer: customer,
       items: [{plan: plan_id}],
