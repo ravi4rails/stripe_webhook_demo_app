@@ -1,5 +1,5 @@
-Stripe.api_key = Rails.configuration.stripe[:secret_key]
-StripeEvent.signing_secret = Rails.application.credentials[:stripe][:stripe_signing_secret]
+Stripe.api_key = ENV["STRIPE_SECRET_KEY"]
+StripeEvent.signing_secret = ENV["STRIPE_SIGNING_SECRET"]
 
 StripeEvent.configure do |events|
   events.subscribe 'product.', Stripe::InvoiceEventHandler.new

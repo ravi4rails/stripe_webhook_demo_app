@@ -1,7 +1,7 @@
 class StripeUsage
 
   def initialize()
-    @stripe_api_key = Rails.application.credentials[:stripe][:stripe_secret_key]
+    @stripe_api_key = ENV["STRIPE_SECRET_KEY"]
   end
 
   def create_customer(email, token)

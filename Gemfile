@@ -63,3 +63,4 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem 'jquery-rails'
 gem 'stripe'
 gem 'stripe_event'
+gem 'dotenv-rails', groups: [:development, :test]
